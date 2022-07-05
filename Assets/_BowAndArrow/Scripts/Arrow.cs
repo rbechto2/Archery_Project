@@ -1,8 +1,15 @@
 ﻿using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.Events;
 
 public class Arrow : XRGrabInteractable
 {
+
+    [System.Serializable]
+    public class UpdateEvent : UnityEvent<int> { };
+
+    public UpdateEvent myEventLogger;
+
     [Header("Settings")]
     public float speed = 2000.0f;
 
@@ -17,6 +24,8 @@ public class Arrow : XRGrabInteractable
     private Vector3 lastPosition = Vector3.zero;
     private bool launched = false;
 
+
+
     protected override void Awake()
     {
         base.Awake();
@@ -28,9 +37,9 @@ public class Arrow : XRGrabInteractable
     {
         // Do this first, so we get the right physics values
         if (args.interactor is XRDirectInteractor)
+            myEventLogger.Invoke(4);
             Clear();
 
-        // Make sure to do this
         base.OnSelectEntering(args);
     }
 
@@ -55,6 +64,7 @@ public class Arrow : XRGrabInteractable
         // Double-check incase the bow is dropped with arrow socketed
         if (notch.IsReady)
         {
+            myEventLogger.Invoke(3);
             SetLaunch(true);
             UpdateLastPosition();
             ApplyForce(notch.PullMeasurer);

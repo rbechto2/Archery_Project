@@ -1,9 +1,15 @@
 ﻿using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(PullMeasurer))]
 public class Notch : XRSocketInteractor
 {
+    [System.Serializable]
+    public class UpdateEvent : UnityEvent<int> { };
+
+    public UpdateEvent myEventLogger;
+
     // Settings
     [Range(0,1)] public float releaseThreshold = 0.25f;
     // Necessary stuff
@@ -38,6 +44,8 @@ public class Notch : XRSocketInteractor
 
     public void ReleaseArrow(SelectExitEventArgs args)
     {
+        myEventLogger.Invoke(2);
+
         // Only release if the target is an arrow using custom deselect
         if (selectTarget is Arrow && PullMeasurer.PullAmount > releaseThreshold)
         {
@@ -61,7 +69,14 @@ public class Notch : XRSocketInteractor
     {
         // We check for the hover here too, since it factors in the recycle time of the socket
         // We also check that notch is ready, which is set once the bow is picked up
-        return base.CanSelect(interactable) && CanHover(interactable) && IsArrow(interactable) && IsReady;
+        bool check = base.CanSelect(interactable) && CanHover(interactable) && IsArrow(interactable) && IsReady;
+        
+        if (check)
+        {
+            myEventLogger.Invoke(1);
+        }
+
+        return check;
     }
 
     private bool IsArrow(XRBaseInteractable interactable)
